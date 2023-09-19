@@ -19,6 +19,7 @@ var (
 	opts  echotron.APIResponseMessage
 )
 
+// returns a new bot
 func newBot(chatID int64) echotron.Bot {
 	return &bot{
 		chatID: chatID,
@@ -26,12 +27,17 @@ func newBot(chatID int64) echotron.Bot {
 	}
 }
 
+// returns the calendar inline keayboard markup
 func cikm() echotron.InlineKeyboardMarkup {
 	return echotron.InlineKeyboardMarkup{
 		InlineKeyboard: IKbCalendar(cal),
 	}
 }
 
+// sends a message containing the input string and the calendar
+// inline keyboard markup.
+// if in the bots previous messages a calendar is presents, it
+// deletes it.
 func (b *bot) sendkb(str string) {
 	if opts.Result != nil {
 		b.DeleteMessage(b.chatID, opts.Result.ID)
@@ -46,11 +52,15 @@ func (b *bot) sendkb(str string) {
 	)
 }
 
+// handles the creation of a new calendar of the specified type
 func (b *bot) handleCalendar(ctype int) {
 	cal = NewCalendar(ctype)
 	b.sendkb(introMsg(cal.CalendarType))
 }
 
+// sends a new calendar inline keyboard with the next month
+// if it's possible, otherwise with the month that was
+// previously set.
 func (b *bot) handleCalendarNextMonth() {
 	if !cal.canGetNextMonth() {
 		b.sendkb(errMsg(cal.CalendarType))
@@ -60,6 +70,9 @@ func (b *bot) handleCalendarNextMonth() {
 	}
 }
 
+// sends a new calendar inline keyboard with the previous month
+// if it's possible, otherwise with the month that was
+// previously set.
 func (b *bot) handleCalendarPrevMonth() {
 	if !cal.canGetPreviousMonth() {
 		b.sendkb(errMsg(cal.CalendarType))
@@ -74,6 +87,7 @@ func (b *bot) handleNextYear() {
 	b.sendkb(introMsg(cal.CalendarType))
 }
 
+// handles every interaction with the inline keyboard the bot shows
 func (b *bot) handleInlineQueries(update *echotron.Update) {
 	switch {
 	case update.CallbackQuery.Data == "listappnt":
@@ -105,6 +119,7 @@ func (b *bot) handleInlineQueries(update *echotron.Update) {
 	}
 }
 
+// handles user input
 func (b *bot) Update(update *echotron.Update) {
 	if update.Message == nil && update.CallbackQuery != nil {
 		b.handleInlineQueries(update)
