@@ -1,4 +1,4 @@
-module quickmath
+module remindotron
 
 go 1.20
 
