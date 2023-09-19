@@ -56,9 +56,9 @@ func (c *calendar) canGetPreviousMonth() bool {
 }
 
 func (c *calendar) canGetNextMonth() bool {
-	if cal.CalendarType == BIRTHDAY &&
-		cal.Month == time.Now().Month() &&
-		cal.Year == time.Now().Year() {
+	if c.CalendarType == BIRTHDAY &&
+		c.Month == time.Now().Month() &&
+		c.Year == time.Now().Year() {
 		return false
 	}
 	return true
@@ -74,11 +74,11 @@ func (c *calendar) prevMonth() {
 }
 
 func (c *calendar) nextMonth() {
-	if int(cal.Month) == 12 {
-		cal.Month = 1
-		cal.Year++
+	if int(c.Month) == 12 {
+		c.Month = 1
+		c.Year++
 	} else {
-		cal.Month++
+		c.Month++
 	}
 }
 
