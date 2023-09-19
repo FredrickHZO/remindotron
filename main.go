@@ -55,7 +55,7 @@ func (b *bot) send(str string) {
 // handles the creation of a new calendar of the specified type
 func (b *bot) handleCalendar(ctype int) {
 	cal = NewCalendar(ctype)
-	b.send(introMsg(cal.CalendarType))
+	b.send(introMsg(ctype))
 }
 
 // sends a new calendar inline keyboard with the next month
@@ -97,7 +97,7 @@ func (b *bot) handleInlineQueries(update *echotron.Update) {
 		b.SendMessage("Funzione non ancora implementata", b.chatID, nil)
 
 	case update.CallbackQuery.Data == "appnt":
-		b.handleCalendar(DATE)
+		b.handleCalendar(APPOINTMENT)
 
 	case update.CallbackQuery.Data == "bday":
 		b.handleCalendar(BIRTHDAY)
