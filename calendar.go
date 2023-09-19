@@ -24,12 +24,62 @@ type calendar struct {
 	CalendarType int
 }
 
+type list struct {
+	events   []calendar
+	ListType int
+}
+
 func isNumeric(s string) bool {
 	_, err := strconv.Atoi(s)
 	if err != nil {
 		return false
 	}
 	return true
+}
+
+func NewCalendar(ctype int) calendar {
+	return calendar{
+		Day:          1,
+		Month:        time.Now().Month(),
+		Year:         time.Now().Year(),
+		CalendarType: ctype,
+	}
+}
+
+func (c *calendar) canGetPreviousMonth() bool {
+	if c.CalendarType == DATE &&
+		c.Month == time.Now().Month() &&
+		c.Year == time.Now().Year() {
+		return false
+	}
+	return true
+}
+
+func (c *calendar) canGetNextMonth() bool {
+	if cal.CalendarType == BIRTHDAY &&
+		cal.Month == time.Now().Month() &&
+		cal.Year == time.Now().Year() {
+		return false
+	}
+	return true
+}
+
+func (c *calendar) prevMonth() {
+	if int(c.Month) == 1 {
+		c.Month = 12
+		c.Year--
+	} else {
+		c.Month -= 1
+	}
+}
+
+func (c *calendar) nextMonth() {
+	if int(cal.Month) == 12 {
+		cal.Month = 1
+		cal.Year++
+	} else {
+		cal.Month++
+	}
 }
 
 func genCalendarDate(c calendar) keyboard {
