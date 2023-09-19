@@ -46,6 +46,7 @@ func NewCalendar(ctype int) calendar {
 	}
 }
 
+// WIP
 func (c *calendar) canGetPreviousMonth() bool {
 	if c.CalendarType == DATE &&
 		c.Month == time.Now().Month() &&
@@ -55,6 +56,7 @@ func (c *calendar) canGetPreviousMonth() bool {
 	return true
 }
 
+// WIP
 func (c *calendar) canGetNextMonth() bool {
 	if c.CalendarType == BIRTHDAY &&
 		c.Month == time.Now().Month() &&
