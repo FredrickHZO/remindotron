@@ -140,7 +140,7 @@ func (b *bot) Update(update *echotron.Update) {
 		ikm := echotron.InlineKeyboardMarkup{
 			InlineKeyboard: ikb}
 		b.SendMessage(
-			"Scegli una di queste azioni dalla lista",
+			"Seleziona una di queste azioni disponibili",
 			b.chatID,
 			&echotron.MessageOptions{ReplyMarkup: ikm},
 		)
