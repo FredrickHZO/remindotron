@@ -79,7 +79,7 @@ func (c *calendar) canGetNextMonth() bool {
 
 // END OF SECTION --------------------------------------------
 
-func (c *calendar) prevMonth() {
+func (c *calendar) prevm() {
 	if int(c.Month) == 1 {
 		c.Month = 12
 		c.Year--
@@ -88,7 +88,7 @@ func (c *calendar) prevMonth() {
 	}
 }
 
-func (c *calendar) nextMonth() {
+func (c *calendar) nextm() {
 	if int(c.Month) == 12 {
 		c.Month = 1
 		c.Year++
@@ -97,7 +97,7 @@ func (c *calendar) nextMonth() {
 	}
 }
 
-func appendMonthYear(c calendar) keyboard {
+func getlayout(c calendar) keyboard {
 	return [][]echotron.InlineKeyboardButton{
 		{
 			{Text: "<", CallbackData: "prevy"},
@@ -112,13 +112,13 @@ func appendMonthYear(c calendar) keyboard {
 	}
 }
 
-func appendEmptyDayBtn(btn button) button {
+func emptyday(btn button) button {
 	btn = append(btn,
 		echotron.InlineKeyboardButton{Text: " ", CallbackData: "ignore"})
 	return btn
 }
 
-func appendDayBtn(btn button, j int) button {
+func day(btn button, j int) button {
 	btn = append(
 		btn,
 		echotron.InlineKeyboardButton{
@@ -129,15 +129,15 @@ func appendDayBtn(btn button, j int) button {
 	return btn
 }
 
-func populateDaysBtns(k keyboard) keyboard {
+func days(k keyboard) keyboard {
 	maxdays := time.Date(time.Now().Year(), time.Now().Month()+1, 0, 0, 0, 0, 0, time.UTC).Day()
 	for days := 1; days <= 31; {
 		var tmp []echotron.InlineKeyboardButton
 		for row := 0; row < 7; row++ {
 			if days > maxdays {
-				tmp = appendEmptyDayBtn(tmp)
+				tmp = emptyday(tmp)
 			} else {
-				tmp = appendDayBtn(tmp, days)
+				tmp = day(tmp, days)
 			}
 			days++
 		}
@@ -146,8 +146,8 @@ func populateDaysBtns(k keyboard) keyboard {
 	return k
 }
 
-func genIKbCalendar(c calendar) keyboard {
-	buttons := appendMonthYear(c)
-	buttons = populateDaysBtns(buttons)
+func IKbCalendar(c calendar) keyboard {
+	buttons := getlayout(c)
+	buttons = days(buttons)
 	return buttons
 }

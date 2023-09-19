@@ -26,9 +26,9 @@ func newBot(chatID int64) echotron.Bot {
 	}
 }
 
-func ikm() echotron.InlineKeyboardMarkup {
+func cikm() echotron.InlineKeyboardMarkup {
 	return echotron.InlineKeyboardMarkup{
-		InlineKeyboard: genIKbCalendar(cal),
+		InlineKeyboard: IKbCalendar(cal),
 	}
 }
 
@@ -40,7 +40,7 @@ func (b *bot) sendkb(str string) {
 		str,
 		b.chatID,
 		&echotron.MessageOptions{
-			ReplyMarkup: ikm(),
+			ReplyMarkup: cikm(),
 			ParseMode:   echotron.MarkdownV2,
 		},
 	)
@@ -55,7 +55,7 @@ func (b *bot) handleCalendarNextMonth() {
 	if !cal.canGetNextMonth() {
 		b.sendkb(errMsg(cal.CalendarType))
 	} else {
-		cal.nextMonth()
+		cal.nextm()
 		b.sendkb(introMsg(cal.CalendarType))
 	}
 }
@@ -64,13 +64,13 @@ func (b *bot) handleCalendarPrevMonth() {
 	if !cal.canGetPreviousMonth() {
 		b.sendkb(errMsg(cal.CalendarType))
 	} else {
-		cal.prevMonth()
+		cal.prevm()
 		b.sendkb(introMsg(cal.CalendarType))
 	}
 }
 
+// WIP
 func (b *bot) handleNextYear() {
-	// WIP
 	b.sendkb(introMsg(cal.CalendarType))
 }
 
