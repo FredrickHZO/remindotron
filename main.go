@@ -3,8 +3,8 @@ package main
 import (
 	_ "embed"
 	"fmt"
+	"strconv"
 	"strings"
-	"time"
 
 	"github.com/NicoNex/echotron/v3"
 )
@@ -14,34 +14,119 @@ type bot struct {
 	echotron.API
 }
 
-type dateinfo struct {
-	date string
-	desc string
-}
-
-// OLD CODE - TO REMOVE
-var infos []dateinfo
-
-var cal calendar
-
-//go:embed token
-var token string
-var opts echotron.APIResponseMessage
+var (
+	//go:embed token
+	token string
+	cal   calendar
+	opts  echotron.APIResponseMessage
+)
 
 func newBot(chatID int64) echotron.Bot {
-	bot := &bot{
+	return &bot{
 		chatID: chatID,
 		API:    echotron.NewAPI(token),
 	}
-	return bot
+}
+
+func ikm() echotron.InlineKeyboardMarkup {
+	return echotron.InlineKeyboardMarkup{
+		InlineKeyboard: generateCalendar(cal),
+	}
+}
+
+func (b *bot) sendkb(str string) {
+	b.DeleteMessage(b.chatID, opts.Result.ID)
+	opts, _ = b.SendMessage(
+		str,
+		b.chatID,
+		&echotron.MessageOptions{
+			ReplyMarkup: ikm(),
+			ParseMode:   echotron.MarkdownV2,
+		},
+	)
+}
+
+func (b *bot) handleCalendar(ctype int) {
+	if opts.Result != nil {
+		b.DeleteMessage(b.chatID, opts.Result.ID)
+	}
+	cal = NewCalendar(ctype)
+	opts, _ = b.SendMessage(
+		introMsg(ctype),
+		b.chatID,
+		&echotron.MessageOptions{
+			ReplyMarkup: ikm(),
+			ParseMode:   echotron.MarkdownV2,
+		},
+	)
+}
+
+func (b *bot) handleCalendarNextMonth() {
+	var str string
+	if !cal.canGetNextMonth() {
+		str = errMsg(cal.CalendarType)
+	} else {
+		str = introMsg(cal.CalendarType)
+		cal.nextMonth()
+	}
+	b.sendkb(str)
+}
+
+func (b *bot) handleCalendarPrevMonth() {
+	var str string
+	if !cal.canGetPreviousMonth() {
+		str = DATE_PAST
+	} else {
+		str = introMsg(cal.CalendarType)
+		cal.prevMonth()
+	}
+	b.sendkb(str)
+}
+
+func (b *bot) handleNextYear() {
+	cal.Year++
+	b.sendkb(introMsg(cal.CalendarType))
+}
+
+func (b *bot) handleInlineQueries(update *echotron.Update) {
+	switch {
+	case update.CallbackQuery.Data == "listapp":
+		b.SendMessage("Funzione non ancora implementata", b.chatID, nil)
+
+	case update.CallbackQuery.Data == "date":
+		b.handleCalendar(DATE)
+
+	case update.CallbackQuery.Data == "bday":
+		b.handleCalendar(BIRTHDAY)
+
+	case update.CallbackQuery.Data == "next":
+		b.handleCalendarNextMonth()
+
+	case update.CallbackQuery.Data == "prev":
+		b.handleCalendarPrevMonth()
+
+	case update.CallbackQuery.Data == "nextyear":
+		b.handleNextYear()
+
+	case isNumeric(update.CallbackQuery.Data):
+		cal.Day, _ = strconv.Atoi(update.CallbackQuery.Data)
+		str := fmt.Sprint(cal.Day) + "/" + cal.Month.String() + "/" + fmt.Sprint(cal.Year)
+
+		b.SendMessage(
+			"Hai selezionato il giorno "+"*"+str+"*"+"\n",
+			b.chatID,
+			&echotron.MessageOptions{
+				ParseMode: echotron.MarkdownV2,
+			},
+		)
+	}
 }
 
 func (b *bot) Update(update *echotron.Update) {
-	if update.Message == nil {
+	if update.Message == nil && update.CallbackQuery != nil {
 		b.handleInlineQueries(update)
 		return
 	}
-
 	switch {
 	case strings.HasPrefix(update.Message.Text, "/start"):
 		test := [][]echotron.InlineKeyboardButton{
@@ -56,112 +141,12 @@ func (b *bot) Update(update *echotron.Update) {
 		}
 		ok := echotron.InlineKeyboardMarkup{
 			InlineKeyboard: test}
-
 		b.SendMessage(
 			"Scegli una di queste azioni dalla lista",
 			b.chatID,
 			&echotron.MessageOptions{ReplyMarkup: ok},
 		)
 	}
-}
-
-func (b *bot) handleCalendar(ctype int) {
-	if opts.Result != nil {
-		b.DeleteMessage(b.chatID, opts.Result.ID)
-	}
-
-	cal = calendar{
-		Day:          1,
-		Month:        time.Now().Month(),
-		Year:         time.Now().Year(),
-		CalendarType: ctype,
-	}
-
-	rmkup := echotron.InlineKeyboardMarkup{
-		InlineKeyboard: generateCalendar(cal),
-	}
-
-	str := "Scegli una data dal calendario"
-	if ctype == BIRTHDAY {
-		str += " per *IL COMPLEANNO* della persona"
-	} else {
-		str += " per l'*IMPEGNO* che vuoi inserire"
-	}
-
-	opts, _ = b.SendMessage(
-		str,
-		b.chatID,
-		&echotron.MessageOptions{
-			ReplyMarkup: rmkup,
-			ParseMode:   echotron.MarkdownV2,
-		},
-	)
-}
-
-func (b *bot) handleCalendarNextMonth() {
-	b.DeleteMessage(b.chatID, opts.Result.ID)
-
-	if int(cal.Month) == 12 {
-		cal.Month = 1
-	} else {
-		cal.Month++
-	}
-	mkup := echotron.InlineKeyboardMarkup{
-		InlineKeyboard: generateCalendar(cal),
-	}
-
-	opts, _ = b.SendMessage(
-		opts.Result.Text,
-		b.chatID,
-		&echotron.MessageOptions{
-			ReplyMarkup: mkup,
-			ParseMode:   echotron.MarkdownV2,
-		},
-	)
-}
-
-func (b *bot) handleInlineQueries(update *echotron.Update) {
-	if update.CallbackQuery == nil {
-		return
-	}
-
-	switch {
-	case update.CallbackQuery.Data == "listapp":
-		b.SendMessage(
-			"*LA LISTA DEGLI IMPEGNI È:* \n"+
-				infos[0].date+infos[0].desc,
-			b.chatID,
-			&echotron.MessageOptions{
-				ParseMode: echotron.MarkdownV2,
-			},
-		)
-
-	case update.CallbackQuery.Data == "date":
-		b.handleCalendar(DATE)
-
-	case update.CallbackQuery.Data == "bday":
-		b.handleCalendar(BIRTHDAY)
-
-	case update.CallbackQuery.Data == "next":
-		b.handleCalendarNextMonth()
-
-	case isNumeric(update.CallbackQuery.Data):
-		var (
-			year  = fmt.Sprint(cal.Year)
-			month = fmt.Sprint(int(cal.Month))
-			str   = update.CallbackQuery.Data + "/" + month + "/" + year
-		)
-		infos = append(infos, dateinfo{date: str, desc: "\tDesc: nessuna"})
-
-		b.SendMessage(
-			"Hai selezionato il giorno "+"*"+str+"*"+"\n",
-			b.chatID,
-			&echotron.MessageOptions{
-				ParseMode: echotron.MarkdownV2,
-			},
-		)
-	}
-
 }
 
 func main() {
