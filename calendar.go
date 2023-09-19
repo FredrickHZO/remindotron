@@ -101,20 +101,26 @@ func (c *calendar) nextm() {
 	}
 }
 
-// fills the calendar keyboard with month and year layout, no days
-func getlayout(c calendar) keyboard {
-	return [][]echotron.InlineKeyboardButton{
-		{
-			{Text: "<", CallbackData: "prevy"},
-			{Text: fmt.Sprint(c.Year), CallbackData: "year"},
-			{Text: ">", CallbackData: "nexty"},
-		},
-		{
-			{Text: "<", CallbackData: "prevm"},
-			{Text: c.Month.String(), CallbackData: "month"},
-			{Text: ">", CallbackData: "nextm"},
-		},
+// fill the calendar keyboard with the year buttons
+func years(c calendar, k keyboard) keyboard {
+	yrs := []echotron.InlineKeyboardButton{
+		{Text: "<", CallbackData: "prevy"},
+		{Text: fmt.Sprint(c.Year), CallbackData: "year"},
+		{Text: ">", CallbackData: "nexty"},
 	}
+	k = append(k, yrs)
+	return k
+}
+
+// fills the calendar keyboard with the month buttons
+func months(c calendar, k keyboard) keyboard {
+	mnt := []echotron.InlineKeyboardButton{
+		{Text: "<", CallbackData: "prevm"},
+		{Text: c.Month.String(), CallbackData: "month"},
+		{Text: ">", CallbackData: "nextm"},
+	}
+	k = append(k, mnt)
+	return k
 }
 
 // returns a filler button for the calendar inline keyboard
@@ -156,7 +162,9 @@ func days(c calendar, k keyboard) keyboard {
 
 // returns a complete calendar inline keyboard that contains year, month and days
 func IKbCalendar(c calendar) keyboard {
-	buttons := getlayout(c)
-	buttons = days(c, buttons)
-	return buttons
+	var layout keyboard
+	layout = years(c, layout)
+	layout = months(c, layout)
+	layout = days(c, layout)
+	return layout
 }
