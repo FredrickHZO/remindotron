@@ -46,25 +46,38 @@ func NewCalendar(ctype int) calendar {
 	}
 }
 
-// WIP
+// THIS SECTION OF CODE HERE IS SUBJECT TO CHANGE ---------------
+
+func (c *calendar) pmappnttest() bool {
+	if c.Year > time.Now().Year() {
+		return true
+	}
+	return false
+}
+
 func (c *calendar) canGetPreviousMonth() bool {
-	if c.CalendarType == DATE &&
-		c.Month == time.Now().Month() &&
+	if c.CalendarType == DATE {
+		return c.pmappnttest()
+	}
+	return true
+}
+
+func (c *calendar) nmbdtest() bool {
+	if c.Month == time.Now().Month() &&
 		c.Year == time.Now().Year() {
 		return false
 	}
 	return true
 }
 
-// WIP
 func (c *calendar) canGetNextMonth() bool {
-	if c.CalendarType == BIRTHDAY &&
-		c.Month == time.Now().Month() &&
-		c.Year == time.Now().Year() {
-		return false
+	if c.CalendarType == BIRTHDAY {
+		return c.nmbdtest()
 	}
 	return true
 }
+
+// END OF SECTION --------------------------------------------
 
 func (c *calendar) prevMonth() {
 	if int(c.Month) == 1 {
@@ -84,25 +97,12 @@ func (c *calendar) nextMonth() {
 	}
 }
 
-func genCalendarDate(c calendar) keyboard {
-	return [][]echotron.InlineKeyboardButton{
-		{
-			{Text: ">", CallbackData: "nextyear"},
-			{Text: fmt.Sprint(c.Year), CallbackData: "year"},
-		},
-		{
-			{Text: "<", CallbackData: "prev"},
-			{Text: c.Month.String(), CallbackData: "month"},
-			{Text: ">", CallbackData: "next"},
-		},
-	}
-}
-
-func genCalendarBirthday(c calendar) keyboard {
+func appendMonthYear(c calendar) keyboard {
 	return [][]echotron.InlineKeyboardButton{
 		{
 			{Text: "<", CallbackData: "prevyear"},
 			{Text: fmt.Sprint(c.Year), CallbackData: "year"},
+			{Text: ">", CallbackData: "nextyear"},
 		},
 		{
 			{Text: "<", CallbackData: "prev"},
@@ -129,8 +129,8 @@ func appendDayBtn(btn button, j int) button {
 	return btn
 }
 
-func populateDaysBtns(c calendar, k keyboard) keyboard {
-	maxdays := time.Date(c.Year, c.Month+1, 0, 0, 0, 0, 0, time.UTC).Day()
+func populateDaysBtns(k keyboard) keyboard {
+	maxdays := time.Date(time.Now().Year(), time.Now().Month()+1, 0, 0, 0, 0, 0, time.UTC).Day()
 	for days := 1; days <= 31; {
 		var tmp []echotron.InlineKeyboardButton
 		for row := 0; row < 7; row++ {
@@ -147,13 +147,7 @@ func populateDaysBtns(c calendar, k keyboard) keyboard {
 }
 
 func genIKbCalendar(c calendar) keyboard {
-	var buttons keyboard
-	if c.CalendarType == BIRTHDAY {
-		buttons = genCalendarBirthday(c)
-	} else {
-		buttons = genCalendarDate(c)
-	}
-	buttons = populateDaysBtns(c, buttons)
-
+	buttons := appendMonthYear(c)
+	buttons = populateDaysBtns(buttons)
 	return buttons
 }
