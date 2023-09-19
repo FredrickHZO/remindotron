@@ -49,8 +49,9 @@ func NewCalendar(ctype int) calendar {
 	}
 }
 
-// THIS SECTION OF CODE HERE IS SUBJECT TO CHANGE ---------------
-
+// in appointments you can only start from the current month of the current
+// year onwords, so if the year shown in the calendar is the same as the current year
+// it means the user is trying to set an appointment 'in the past'
 func (c *calendar) prevmAppnt() bool {
 	if c.Year > time.Now().Year() {
 		return true
@@ -58,13 +59,23 @@ func (c *calendar) prevmAppnt() bool {
 	return false
 }
 
+// returns the correct value {true or false} for every type of calendar
+// when an action to get the previous month of the one shown in
+// the calendar is made
 func (c *calendar) canGetPreviousMonth() bool {
-	if c.CalendarType == APPOINTMENT {
+	switch c.CalendarType {
+	case APPOINTMENT:
 		return c.prevmAppnt()
+	default:
+		return true
 	}
-	return true
 }
 
+// in birtdays you can only start from the current month of the current
+// year and go back from there, if the year in the calendar is the same as
+// the current actual year and the month is the same, you cannot choose
+// the following months, it would mean you're trying to set a birthday
+// for someone that was born 'in the future'
 func (c *calendar) nextmBday() bool {
 	if c.Month == time.Now().Month() &&
 		c.Year == time.Now().Year() {
@@ -73,16 +84,20 @@ func (c *calendar) nextmBday() bool {
 	return true
 }
 
+// returns the correct value {true or false} for every type of calendar
+// when an action to get the next month of the one shown in
+// the calendar is made
 func (c *calendar) canGetNextMonth() bool {
-	if c.CalendarType == BIRTHDAY {
+	switch c.CalendarType {
+	case BIRTHDAY:
 		return c.nextmBday()
+	default:
+		return true
 	}
-	return true
 }
 
-// END OF SECTION --------------------------------------------
-
-// safely gets the next month in the calendar
+// safely gets the next month in the calendar, if the month is
+// January when this function is called, the year will change accordingly
 func (c *calendar) prevm() {
 	if int(c.Month) == 1 {
 		c.Month = 12
@@ -92,7 +107,8 @@ func (c *calendar) prevm() {
 	}
 }
 
-// safely gets the previous month in the calendar
+// safely gets the previous month in the calendar, if the month is
+// December when this function is called, the year will change accordingly
 func (c *calendar) nextm() {
 	if int(c.Month) == 12 {
 		c.Month = 1
@@ -102,7 +118,7 @@ func (c *calendar) nextm() {
 	}
 }
 
-// fill the calendar keyboard with the year buttons
+// appends the year buttons to the calendar keyboard
 func years(c calendar, k keyboard) keyboard {
 	yrs := []echotron.InlineKeyboardButton{
 		{Text: "<", CallbackData: "prevy"},
@@ -113,7 +129,7 @@ func years(c calendar, k keyboard) keyboard {
 	return k
 }
 
-// fills the calendar keyboard with the month buttons
+// appends the month buttons to the calendar keaybord
 func months(c calendar, k keyboard) keyboard {
 	mnt := []echotron.InlineKeyboardButton{
 		{Text: "<", CallbackData: "prevm"},
@@ -124,14 +140,14 @@ func months(c calendar, k keyboard) keyboard {
 	return k
 }
 
-// returns a filler button for the calendar inline keyboard
+// appends a single filler day button for a row of the calendar keyboard
 func emptyday(btn button) button {
 	btn = append(btn,
 		echotron.InlineKeyboardButton{Text: " ", CallbackData: "ignore"})
 	return btn
 }
 
-// returns a single day button for the calendar inline keyboard
+// appends a single day button for a row of the calendar keyboard
 func day(btn button, day int) button {
 	btn = append(
 		btn,
