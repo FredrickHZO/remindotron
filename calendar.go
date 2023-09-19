@@ -159,20 +159,22 @@ func day(btn button, day int) button {
 	return btn
 }
 
+// appends the correct kind of day button
+func putday(max, days int, b button) button {
+	if days > max {
+		return emptyday(b)
+	}
+	return day(b, days)
+}
+
 // fills the calendar inline keyboard with all the days in the month
 func days(c calendar, k keyboard) keyboard {
-	var (
-		tmp []echotron.InlineKeyboardButton
-		max = time.Date(c.Year, c.Month+1, 0, 0, 0, 0, 0, time.UTC).Day()
-	)
+	max := time.Date(c.Year, c.Month+1, 0, 0, 0, 0, 0, time.UTC).Day()
 
 	for days := 1; days <= 31; {
+		tmp := []echotron.InlineKeyboardButton{}
 		for row := 0; row < 7; row++ {
-			if days > max {
-				tmp = emptyday(tmp)
-			} else {
-				tmp = day(tmp, days)
-			}
+			tmp = putday(max, days, tmp)
 			days++
 		}
 		k = append(k, tmp)
