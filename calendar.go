@@ -144,7 +144,7 @@ func populateDaysBtns(c calendar, k keyboard) keyboard {
 	return k
 }
 
-func generateCalendar(c calendar) keyboard {
+func genIKbCalendar(c calendar) keyboard {
 	var buttons keyboard
 	if c.CalendarType == BIRTHDAY {
 		buttons = genCalendarBirthday(c)

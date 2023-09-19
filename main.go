@@ -2,8 +2,6 @@ package main
 
 import (
 	_ "embed"
-	"fmt"
-	"strconv"
 	"strings"
 
 	"github.com/NicoNex/echotron/v3"
@@ -30,7 +28,7 @@ func newBot(chatID int64) echotron.Bot {
 
 func ikm() echotron.InlineKeyboardMarkup {
 	return echotron.InlineKeyboardMarkup{
-		InlineKeyboard: generateCalendar(cal),
+		InlineKeyboard: genIKbCalendar(cal),
 	}
 }
 
@@ -81,7 +79,7 @@ func (b *bot) handleInlineQueries(update *echotron.Update) {
 	case update.CallbackQuery.Data == "listapp":
 		b.SendMessage("Funzione non ancora implementata", b.chatID, nil)
 
-	case update.CallbackQuery.Data == "date":
+	case update.CallbackQuery.Data == "appnt":
 		b.handleCalendar(DATE)
 
 	case update.CallbackQuery.Data == "bday":
@@ -97,16 +95,7 @@ func (b *bot) handleInlineQueries(update *echotron.Update) {
 		b.handleNextYear()
 
 	case isNumeric(update.CallbackQuery.Data):
-		cal.Day, _ = strconv.Atoi(update.CallbackQuery.Data)
-		str := fmt.Sprint(cal.Day) + "/" + cal.Month.String() + "/" + fmt.Sprint(cal.Year)
-
-		b.SendMessage(
-			"Hai selezionato il giorno "+"*"+str+"*"+"\n",
-			b.chatID,
-			&echotron.MessageOptions{
-				ParseMode: echotron.MarkdownV2,
-			},
-		)
+		// WIP
 	}
 }
 
@@ -117,22 +106,22 @@ func (b *bot) Update(update *echotron.Update) {
 	}
 	switch {
 	case strings.HasPrefix(update.Message.Text, "/start"):
-		test := [][]echotron.InlineKeyboardButton{
+		ikb := [][]echotron.InlineKeyboardButton{
 			{
 				{Text: "🎊 Compleanno", CallbackData: "bday"},
-				{Text: "📅 Impegno", CallbackData: "date"},
+				{Text: "📅 Impegno", CallbackData: "appnt"},
 			},
 			{
 				{Text: "Lista Comp.", CallbackData: "listbday"},
-				{Text: "Lista Impe.", CallbackData: "listapp"},
+				{Text: "Lista Impe.", CallbackData: "listappnt"},
 			},
 		}
-		ok := echotron.InlineKeyboardMarkup{
-			InlineKeyboard: test}
+		ikm := echotron.InlineKeyboardMarkup{
+			InlineKeyboard: ikb}
 		b.SendMessage(
 			"Scegli una di queste azioni dalla lista",
 			b.chatID,
-			&echotron.MessageOptions{ReplyMarkup: ok},
+			&echotron.MessageOptions{ReplyMarkup: ikm},
 		)
 	}
 }
