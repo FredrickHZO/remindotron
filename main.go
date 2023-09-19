@@ -35,7 +35,9 @@ func ikm() echotron.InlineKeyboardMarkup {
 }
 
 func (b *bot) sendkb(str string) {
-	b.DeleteMessage(b.chatID, opts.Result.ID)
+	if opts.Result != nil {
+		b.DeleteMessage(b.chatID, opts.Result.ID)
+	}
 	opts, _ = b.SendMessage(
 		str,
 		b.chatID,
@@ -47,44 +49,30 @@ func (b *bot) sendkb(str string) {
 }
 
 func (b *bot) handleCalendar(ctype int) {
-	if opts.Result != nil {
-		b.DeleteMessage(b.chatID, opts.Result.ID)
-	}
 	cal = NewCalendar(ctype)
-	opts, _ = b.SendMessage(
-		introMsg(ctype),
-		b.chatID,
-		&echotron.MessageOptions{
-			ReplyMarkup: ikm(),
-			ParseMode:   echotron.MarkdownV2,
-		},
-	)
+	b.sendkb(introMsg(cal.CalendarType))
 }
 
 func (b *bot) handleCalendarNextMonth() {
-	var str string
 	if !cal.canGetNextMonth() {
-		str = errMsg(cal.CalendarType)
+		b.sendkb(errMsg(cal.CalendarType))
 	} else {
-		str = introMsg(cal.CalendarType)
 		cal.nextMonth()
+		b.sendkb(introMsg(cal.CalendarType))
 	}
-	b.sendkb(str)
 }
 
 func (b *bot) handleCalendarPrevMonth() {
-	var str string
 	if !cal.canGetPreviousMonth() {
-		str = DATE_PAST
+		b.sendkb(errMsg(cal.CalendarType))
 	} else {
-		str = introMsg(cal.CalendarType)
 		cal.prevMonth()
+		b.sendkb(introMsg(cal.CalendarType))
 	}
-	b.sendkb(str)
 }
 
 func (b *bot) handleNextYear() {
-	cal.Year++
+	// WIP
 	b.sendkb(introMsg(cal.CalendarType))
 }
 
