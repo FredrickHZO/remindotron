@@ -29,7 +29,7 @@ type list struct {
 	ListType int
 }
 
-func isNumeric(s string) bool {
+func isday(s string) bool {
 	_, err := strconv.Atoi(s)
 	if err != nil {
 		return false
@@ -100,14 +100,14 @@ func (c *calendar) nextMonth() {
 func appendMonthYear(c calendar) keyboard {
 	return [][]echotron.InlineKeyboardButton{
 		{
-			{Text: "<", CallbackData: "prevyear"},
+			{Text: "<", CallbackData: "prevy"},
 			{Text: fmt.Sprint(c.Year), CallbackData: "year"},
-			{Text: ">", CallbackData: "nextyear"},
+			{Text: ">", CallbackData: "nexty"},
 		},
 		{
-			{Text: "<", CallbackData: "prev"},
+			{Text: "<", CallbackData: "prevm"},
 			{Text: c.Month.String(), CallbackData: "month"},
-			{Text: ">", CallbackData: "next"},
+			{Text: ">", CallbackData: "nextm"},
 		},
 	}
 }

@@ -76,7 +76,10 @@ func (b *bot) handleNextYear() {
 
 func (b *bot) handleInlineQueries(update *echotron.Update) {
 	switch {
-	case update.CallbackQuery.Data == "listapp":
+	case update.CallbackQuery.Data == "listappnt":
+		b.SendMessage("Funzione non ancora implementata", b.chatID, nil)
+
+	case update.CallbackQuery.Data == "listbday":
 		b.SendMessage("Funzione non ancora implementata", b.chatID, nil)
 
 	case update.CallbackQuery.Data == "appnt":
@@ -85,16 +88,19 @@ func (b *bot) handleInlineQueries(update *echotron.Update) {
 	case update.CallbackQuery.Data == "bday":
 		b.handleCalendar(BIRTHDAY)
 
-	case update.CallbackQuery.Data == "next":
+	case update.CallbackQuery.Data == "nextm":
 		b.handleCalendarNextMonth()
 
-	case update.CallbackQuery.Data == "prev":
+	case update.CallbackQuery.Data == "prevm":
 		b.handleCalendarPrevMonth()
 
-	case update.CallbackQuery.Data == "nextyear":
+	case update.CallbackQuery.Data == "nexty":
 		b.handleNextYear()
 
-	case isNumeric(update.CallbackQuery.Data):
+	case update.CallbackQuery.Data == "prevy":
+		b.SendMessage("Funzione non ancora implementata", b.chatID, nil)
+
+	case isday(update.CallbackQuery.Data):
 		// WIP
 	}
 }
