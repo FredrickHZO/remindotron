@@ -36,9 +36,9 @@ func cikm() echotron.InlineKeyboardMarkup {
 
 // sends a message containing the input string and the calendar
 // inline keyboard markup.
-// if in the bots previous messages a calendar is presents, it
-// deletes it.
-func (b *bot) sendkb(str string) {
+// if in the bots previous messages there is a calendar, it
+// gets deleted.
+func (b *bot) send(str string) {
 	if opts.Result != nil {
 		b.DeleteMessage(b.chatID, opts.Result.ID)
 	}
@@ -55,36 +55,36 @@ func (b *bot) sendkb(str string) {
 // handles the creation of a new calendar of the specified type
 func (b *bot) handleCalendar(ctype int) {
 	cal = NewCalendar(ctype)
-	b.sendkb(introMsg(cal.CalendarType))
+	b.send(introMsg(cal.CalendarType))
 }
 
 // sends a new calendar inline keyboard with the next month
 // if it's possible, otherwise with the month that was
-// previously set.
+// previously set and shows the correct warning message
 func (b *bot) handleCalendarNextMonth() {
 	if !cal.canGetNextMonth() {
-		b.sendkb(errMsg(cal.CalendarType))
+		b.send(errMsg(cal.CalendarType))
 	} else {
 		cal.nextm()
-		b.sendkb(introMsg(cal.CalendarType))
+		b.send(introMsg(cal.CalendarType))
 	}
 }
 
 // sends a new calendar inline keyboard with the previous month
 // if it's possible, otherwise with the month that was
-// previously set.
+// previously set and shows the correct warning message
 func (b *bot) handleCalendarPrevMonth() {
 	if !cal.canGetPreviousMonth() {
-		b.sendkb(errMsg(cal.CalendarType))
+		b.send(errMsg(cal.CalendarType))
 	} else {
 		cal.prevm()
-		b.sendkb(introMsg(cal.CalendarType))
+		b.send(introMsg(cal.CalendarType))
 	}
 }
 
 // WIP
 func (b *bot) handleNextYear() {
-	b.sendkb(introMsg(cal.CalendarType))
+	b.send(introMsg(cal.CalendarType))
 }
 
 // handles every interaction with the inline keyboard the bot shows
