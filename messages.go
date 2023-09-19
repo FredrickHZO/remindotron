@@ -1,10 +1,10 @@
 package main
 
 const (
-	BDAY_FUTURE     string = "*Devo pensare che sei nel futuro? scegli una data che sia valida*"
-	DATE_PAST              = "*Hai la capacità di viaggiare nel tempo? inserisci una data valida*"
-	CAL_CHOOSE_BDAY        = "Scegli una data dal calendario per *IL COMPLEANNO* della persona"
-	CAL_CHOOSE_DATE        = "Scegli una data dal calendario per l'*IMPEGNO* che vuoi inserire"
+	BDAY_FUTURE      string = "*Devo pensare che sei nel futuro? scegli una data che sia valida*"
+	APPNT_PAST              = "*Hai la capacità di viaggiare nel tempo? inserisci una data valida*"
+	CAL_CHOOSE_BDAY         = "Scegli una data dal calendario per *IL COMPLEANNO* della persona"
+	CAL_CHOOSE_APPNT        = "Scegli una data dal calendario per l'*IMPEGNO* che vuoi inserire"
 )
 
 // returns the correct intro message the bot shows
@@ -14,8 +14,8 @@ func introMsg(ctype int) string {
 	switch ctype {
 	case BIRTHDAY:
 		return CAL_CHOOSE_BDAY
-	case DATE:
-		return CAL_CHOOSE_DATE
+	case APPOINTMENT:
+		return CAL_CHOOSE_APPNT
 	default:
 		return " "
 	}
@@ -28,8 +28,8 @@ func errMsg(ctype int) string {
 	switch ctype {
 	case BIRTHDAY:
 		return BDAY_FUTURE
-	case DATE:
-		return DATE_PAST
+	case APPOINTMENT:
+		return APPNT_PAST
 	default:
 		return " "
 	}
