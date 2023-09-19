@@ -29,6 +29,7 @@ type list struct {
 	ListType int
 }
 
+// returns true if the input string is a number
 func isday(s string) bool {
 	_, err := strconv.Atoi(s)
 	if err != nil {
@@ -37,6 +38,7 @@ func isday(s string) bool {
 	return true
 }
 
+// returns a new calendar with of the specified type
 func NewCalendar(ctype int) calendar {
 	return calendar{
 		Day:          1,
@@ -79,6 +81,7 @@ func (c *calendar) canGetNextMonth() bool {
 
 // END OF SECTION --------------------------------------------
 
+// safely gets the next month in the calendar
 func (c *calendar) prevm() {
 	if int(c.Month) == 1 {
 		c.Month = 12
@@ -88,6 +91,7 @@ func (c *calendar) prevm() {
 	}
 }
 
+// safely gets the previous month in the calendar
 func (c *calendar) nextm() {
 	if int(c.Month) == 12 {
 		c.Month = 1
@@ -97,6 +101,7 @@ func (c *calendar) nextm() {
 	}
 }
 
+// fills the calendar keyboard with month and year layout, no days
 func getlayout(c calendar) keyboard {
 	return [][]echotron.InlineKeyboardButton{
 		{
@@ -112,25 +117,28 @@ func getlayout(c calendar) keyboard {
 	}
 }
 
+// returns a filler button for the calendar inline keyboard
 func emptyday(btn button) button {
 	btn = append(btn,
 		echotron.InlineKeyboardButton{Text: " ", CallbackData: "ignore"})
 	return btn
 }
 
-func day(btn button, j int) button {
+// returns a single day button for the calendar inline keyboard
+func day(btn button, day int) button {
 	btn = append(
 		btn,
 		echotron.InlineKeyboardButton{
-			Text:         fmt.Sprint(j),
-			CallbackData: fmt.Sprint(j),
+			Text:         fmt.Sprint(day),
+			CallbackData: fmt.Sprint(day),
 		},
 	)
 	return btn
 }
 
-func days(k keyboard) keyboard {
-	maxdays := time.Date(time.Now().Year(), time.Now().Month()+1, 0, 0, 0, 0, 0, time.UTC).Day()
+// fills the calendar inline keyboard with all the days in the month
+func days(c calendar, k keyboard) keyboard {
+	maxdays := time.Date(c.Year, c.Month+1, 0, 0, 0, 0, 0, time.UTC).Day()
 	for days := 1; days <= 31; {
 		var tmp []echotron.InlineKeyboardButton
 		for row := 0; row < 7; row++ {
@@ -146,8 +154,9 @@ func days(k keyboard) keyboard {
 	return k
 }
 
+// returns a complete calendar inline keyboard that contains year, month and days
 func IKbCalendar(c calendar) keyboard {
 	buttons := getlayout(c)
-	buttons = days(buttons)
+	buttons = days(c, buttons)
 	return buttons
 }
