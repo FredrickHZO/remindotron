@@ -9,7 +9,7 @@ import (
 )
 
 type keyboard [][]echotron.InlineKeyboardButton
-type button []echotron.InlineKeyboardButton
+type btnrow []echotron.InlineKeyboardButton
 
 const (
 	BIRTHDAY = iota
@@ -39,7 +39,7 @@ func isday(s string) bool {
 	return true
 }
 
-// returns a new calendar with of the specified type
+// returns a new calendar of the specified type
 func NewCalendar(ctype int) calendar {
 	return calendar{
 		Day:          1,
@@ -50,7 +50,7 @@ func NewCalendar(ctype int) calendar {
 }
 
 // in appointments you can only start from the current month of the current
-// year onwords, so if the year shown in the calendar is the same as the current year
+// year onwards, so if the year shown in the calendar is the same as the current year
 // it means the user is trying to set an appointment 'in the past'
 func (c *calendar) prevmAppnt() bool {
 	if c.Year > time.Now().Year() {
@@ -141,14 +141,14 @@ func months(c calendar, k keyboard) keyboard {
 }
 
 // appends a single filler day button for a row of the calendar keyboard
-func emptyday(btn button) button {
+func emptyday(btn btnrow) btnrow {
 	btn = append(btn,
 		echotron.InlineKeyboardButton{Text: " ", CallbackData: "ignore"})
 	return btn
 }
 
 // appends a single day button for a row of the calendar keyboard
-func day(btn button, day int) button {
+func day(btn btnrow, day int) btnrow {
 	btn = append(
 		btn,
 		echotron.InlineKeyboardButton{
@@ -160,7 +160,7 @@ func day(btn button, day int) button {
 }
 
 // appends the correct kind of day button
-func putday(max, days int, b button) button {
+func putday(max, days int, b btnrow) btnrow {
 	if days > max {
 		return emptyday(b)
 	}
