@@ -24,10 +24,6 @@ var itmonths = map[time.Month]string{
 	time.December:  "Dicembre",
 }
 
-func MonthLookup(id time.Month) string {
-	return itmonths[id]
-}
-
 // returns the correct intro message the bot shows
 // according to the type of the calendar when you
 // select one of the calendar options

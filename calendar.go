@@ -132,7 +132,7 @@ func years(c calendar, k keyboard) keyboard {
 func months(c calendar, k keyboard) keyboard {
 	mnt := []echotron.InlineKeyboardButton{
 		{Text: "<", CallbackData: "prevm"},
-		{Text: MonthLookup(c.Month), CallbackData: "month"},
+		{Text: itmonths[c.Month], CallbackData: "month"},
 		{Text: ">", CallbackData: "nextm"},
 	}
 	k = append(k, mnt)
