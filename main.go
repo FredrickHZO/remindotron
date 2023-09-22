@@ -38,24 +38,40 @@ func cikm() echotron.InlineKeyboardMarkup {
 // inline keyboard markup.
 // if in the bots previous messages there is a calendar, it
 // gets deleted.
-func (b *bot) send(str string) {
-	if opts.Result != nil {
-		b.DeleteMessage(b.chatID, opts.Result.ID)
-	}
-	opts, _ = b.SendMessage(
+func (b *bot) editmsg(str string) {
+	b.EditMessageText(
 		str,
-		b.chatID,
-		&echotron.MessageOptions{
-			ReplyMarkup: cikm(),
+		echotron.NewMessageID(b.chatID, opts.Result.ID),
+		&echotron.MessageTextOptions{
 			ParseMode:   echotron.MarkdownV2,
+			ReplyMarkup: cikm(),
+		},
+	)
+}
+
+func (b *bot) editmarkup() {
+	b.EditMessageReplyMarkup(
+		echotron.NewMessageID(b.chatID, opts.Result.ID),
+		&echotron.MessageReplyMarkup{
+			ReplyMarkup: cikm(),
 		},
 	)
 }
 
 // handles the creation of a new calendar of the specified type
 func (b *bot) handleCalendar(ctype int) {
+	if opts.Result != nil {
+		b.DeleteMessage(b.chatID, opts.Result.ID)
+	}
 	cal = NewCalendar(ctype)
-	b.send(introMsg(ctype))
+	opts, _ = b.SendMessage(
+		introMsg(cal.CalendarType),
+		b.chatID,
+		&echotron.MessageOptions{
+			ParseMode:   echotron.MarkdownV2,
+			ReplyMarkup: cikm(),
+		},
+	)
 }
 
 // sends a new calendar inline keyboard with the next month
@@ -63,10 +79,10 @@ func (b *bot) handleCalendar(ctype int) {
 // previously set and shows the correct warning message
 func (b *bot) handleCalendarNextMonth() {
 	if !cal.canGetNextMonth() {
-		b.send(errMsg(cal.CalendarType))
+		b.editmsg(errMsg(cal.CalendarType))
 	} else {
 		cal.nextm()
-		b.send(introMsg(cal.CalendarType))
+		b.editmarkup()
 	}
 }
 
@@ -75,16 +91,16 @@ func (b *bot) handleCalendarNextMonth() {
 // previously set and shows the correct warning message
 func (b *bot) handleCalendarPrevMonth() {
 	if !cal.canGetPreviousMonth() {
-		b.send(errMsg(cal.CalendarType))
+		b.editmsg(errMsg(cal.CalendarType))
 	} else {
 		cal.prevm()
-		b.send(introMsg(cal.CalendarType))
+		b.editmarkup()
 	}
 }
 
 // WIP
 func (b *bot) handleNextYear() {
-	b.send(introMsg(cal.CalendarType))
+	b.editmsg(introMsg(cal.CalendarType))
 }
 
 // handles every interaction with the inline keyboard the bot shows
