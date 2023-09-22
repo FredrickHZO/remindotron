@@ -1,4 +1,4 @@
-package main
+package calendar
 
 import "time"
 
@@ -27,7 +27,7 @@ var itmonths = map[time.Month]string{
 // returns the correct intro message the bot shows
 // according to the type of the calendar when you
 // select one of the calendar options
-func introMsg(ctype int) string {
+func IntroMsg(ctype int) string {
 	switch ctype {
 	case BIRTHDAY:
 		return CAL_CHOOSE_BDAY
@@ -41,7 +41,7 @@ func introMsg(ctype int) string {
 // returns the correct error message the bot shows
 // according to the type of the calendar when the user
 // does an illegal action
-func errMsg(ctype int) string {
+func ErrMsg(ctype int) string {
 	switch ctype {
 	case BIRTHDAY:
 		return BDAY_FUTURE

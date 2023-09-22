@@ -2,6 +2,8 @@ package main
 
 import (
 	_ "embed"
+	cl "remindotron/calendar"
+	"strconv"
 	"strings"
 	"time"
 
@@ -16,7 +18,7 @@ type bot struct {
 var (
 	//go:embed token
 	token string
-	dt    date
+	date  cl.Date
 	msg   echotron.APIResponseMessage
 )
 
@@ -28,10 +30,18 @@ func newBot(chatID int64) echotron.Bot {
 	}
 }
 
+// returns true if the input string is a number
+func isday(s string) bool {
+	if _, err := strconv.Atoi(s); err != nil {
+		return false
+	}
+	return true
+}
+
 // returns the date inline keayboard markup
 func cikm() echotron.InlineKeyboardMarkup {
 	return echotron.InlineKeyboardMarkup{
-		InlineKeyboard: IKbdate(dt),
+		InlineKeyboard: cl.IKbdate(date),
 	}
 }
 
@@ -67,19 +77,19 @@ func (b *bot) send(str string) {
 
 // handles the creation of a new date of the specified type
 func (b *bot) handledate(ctype int) {
-	dt = Newdate(ctype)
-	b.send(introMsg(ctype))
+	date = cl.Newdate(ctype)
+	b.send(cl.IntroMsg(ctype))
 }
 
 // sends a new date inline keyboard with the next month
 // if it's possible, otherwise with the month that was
 // previously set and shows the correct warning message
 func (b *bot) handledateNextMonth() {
-	if !dt.canGetNextMonth() {
-		b.send(errMsg(dt.dateType))
+	if !date.CanGetNextMonth() {
+		b.send(cl.ErrMsg(date.DateType))
 	} else {
-		dt.nextm()
-		b.editmsg(introMsg(dt.dateType))
+		date.Nextm()
+		b.editmsg(cl.IntroMsg(date.DateType))
 	}
 }
 
@@ -87,36 +97,36 @@ func (b *bot) handledateNextMonth() {
 // if it's possible, otherwise with the month that was
 // previously set and shows the correct warning message
 func (b *bot) handledatePrevMonth() {
-	if !dt.canGetPreviousMonth() {
-		b.send(errMsg(dt.dateType))
+	if !date.CanGetPreviousMonth() {
+		b.send(cl.ErrMsg(date.DateType))
 	} else {
-		dt.prevm()
-		b.editmsg(introMsg(dt.dateType))
+		date.Prevm()
+		b.editmsg(cl.IntroMsg(date.DateType))
 	}
 }
 
 // WIP
 func (b *bot) handleNextYear() {
-	if !dt.canGetNextYear() {
-		b.send(errMsg(dt.dateType))
+	if !date.CanGetNextYear() {
+		b.send(cl.ErrMsg(date.DateType))
 	} else {
-		if dt.shouldResetMonth() {
-			dt.Month = time.Now().Month()
+		if date.ShouldResetMonth() {
+			date.Month = time.Now().Month()
 		}
-		dt.Year++
-		b.editmsg(introMsg(dt.dateType))
+		date.Year++
+		b.editmsg(cl.IntroMsg(date.DateType))
 	}
 }
 
 func (b *bot) handlePrevYear() {
-	if !dt.canGetPreviousYear() {
-		b.send(errMsg(dt.dateType))
+	if !date.CanGetPreviousYear() {
+		b.send(cl.ErrMsg(date.DateType))
 	} else {
-		if dt.shouldResetMonth() {
-			dt.Month = time.Now().Month()
+		if date.ShouldResetMonth() {
+			date.Month = time.Now().Month()
 		}
-		dt.Year--
-		b.editmsg(introMsg(dt.dateType))
+		date.Year--
+		b.editmsg(cl.IntroMsg(date.DateType))
 	}
 }
 
@@ -131,10 +141,10 @@ func (b *bot) handleInlineQueries(update *echotron.Update) {
 		b.SendMessage("Funzione non ancora implementata", b.chatID, nil)
 
 	case update.CallbackQuery.Data == "appnt":
-		b.handledate(APPOINTMENT)
+		b.handledate(cl.APPOINTMENT)
 
 	case update.CallbackQuery.Data == "bday":
-		b.handledate(BIRTHDAY)
+		b.handledate(cl.BIRTHDAY)
 
 	case update.CallbackQuery.Data == "nextm":
 		b.handledateNextMonth()

@@ -1,8 +1,7 @@
-package main
+package calendar
 
 import (
 	"fmt"
-	"strconv"
 	"time"
 
 	"github.com/NicoNex/echotron/v3"
@@ -18,42 +17,32 @@ const (
 	// RECURRENT
 )
 
-var ()
-
-type moment struct {
+type Moment struct {
 	Hours   int `json:"hours,omitempty"`
 	Minutes int `json:"minutes,omitempty"`
 }
 
-type date struct {
+type Date struct {
 	ID       string     `json:"id"`
 	Day      int        `json:"day"`
 	Month    time.Month `json:"month"`
 	Year     int        `json:"years,omitempty"`
-	Hours    moment     `json:"time,omitempty"`
-	dateType int        `json:"datetype"`
+	Hours    Moment     `json:"time,omitempty"`
+	DateType int        `json:"datetype"`
 }
 
-type calendar struct {
-	dates    []date `json:"calendar"`
+type Calendar struct {
+	Dates    []Date `json:"calendar"`
 	ListType int    `json:"calendartype"`
 }
 
-// returns true if the input string is a number
-func isday(s string) bool {
-	if _, err := strconv.Atoi(s); err != nil {
-		return false
-	}
-	return true
-}
-
 // returns a new date of the specified type
-func Newdate(ctype int) date {
-	return date{
+func Newdate(ctype int) Date {
+	return Date{
 		Day:      1,
 		Month:    time.Now().Month(),
 		Year:     time.Now().Year(),
-		dateType: ctype,
+		DateType: ctype,
 	}
 }
 
@@ -62,8 +51,8 @@ func Newdate(ctype int) date {
 // current one and an illegal month (for the 'actual real' year) is set, when
 // the year in the date is changed back to be the same of the
 // 'actual real' year, the months should be changed aswell
-func (c *date) shouldResetMonth() bool {
-	switch c.dateType {
+func (c *Date) ShouldResetMonth() bool {
+	switch c.DateType {
 	case APPOINTMENT:
 		if c.Year == time.Now().Year()+1 &&
 			c.Month < time.Now().Month() {
@@ -83,8 +72,8 @@ func (c *date) shouldResetMonth() bool {
 	}
 }
 
-func (c *date) canGetPreviousYear() bool {
-	switch c.dateType {
+func (c *Date) CanGetPreviousYear() bool {
+	switch c.DateType {
 	case APPOINTMENT:
 		if time.Now().Year() == c.Year {
 			return false
@@ -96,8 +85,8 @@ func (c *date) canGetPreviousYear() bool {
 	}
 }
 
-func (c *date) canGetNextYear() bool {
-	switch c.dateType {
+func (c *Date) CanGetNextYear() bool {
+	switch c.DateType {
 	case BIRTHDAY:
 		if time.Now().Year() == c.Year {
 			return false
@@ -112,8 +101,8 @@ func (c *date) canGetNextYear() bool {
 // returns the correct value {true or false} for every type of date
 // when an action to get the previous month of the one shown in
 // the date is made
-func (c *date) canGetPreviousMonth() bool {
-	switch c.dateType {
+func (c *Date) CanGetPreviousMonth() bool {
+	switch c.DateType {
 	case APPOINTMENT:
 		if c.Year > time.Now().Year() {
 			return true
@@ -128,8 +117,8 @@ func (c *date) canGetPreviousMonth() bool {
 // returns the correct value {true or false} for every type of date
 // when an action to get the next month of the one shown in
 // the date is made
-func (c *date) canGetNextMonth() bool {
-	switch c.dateType {
+func (c *Date) CanGetNextMonth() bool {
+	switch c.DateType {
 	case BIRTHDAY:
 		if c.Month == time.Now().Month() &&
 			c.Year == time.Now().Year() {
@@ -144,7 +133,7 @@ func (c *date) canGetNextMonth() bool {
 
 // safely gets the next month in the date, if the month is
 // January when this function is called, the year will change accordingly
-func (c *date) prevm() {
+func (c *Date) Prevm() {
 	if c.Month == time.January {
 		c.Month = time.December
 		c.Year--
@@ -155,7 +144,7 @@ func (c *date) prevm() {
 
 // safely gets the previous month in the date, if the month is
 // December when this function is called, the year will change accordingly
-func (c *date) nextm() {
+func (c *Date) Nextm() {
 	if c.Month == time.December {
 		c.Month = time.January
 		c.Year++
@@ -165,7 +154,7 @@ func (c *date) nextm() {
 }
 
 // appends the year buttons to the date keyboard
-func years(c date, k keyboard) keyboard {
+func years(c Date, k keyboard) keyboard {
 	yrs := []echotron.InlineKeyboardButton{
 		{Text: "<", CallbackData: "prevy"},
 		{Text: fmt.Sprint(c.Year), CallbackData: "year"},
@@ -176,7 +165,7 @@ func years(c date, k keyboard) keyboard {
 }
 
 // appends the month buttons to the date keaybord
-func months(c date, k keyboard) keyboard {
+func months(c Date, k keyboard) keyboard {
 	mnt := []echotron.InlineKeyboardButton{
 		{Text: "<", CallbackData: "prevm"},
 		{Text: itmonths[c.Month], CallbackData: "month"},
@@ -214,7 +203,7 @@ func putday(max, days int, b btnrow) btnrow {
 }
 
 // fills the date inline keyboard with all the days in the month
-func days(c date, k keyboard) keyboard {
+func days(c Date, k keyboard) keyboard {
 	max := time.Date(c.Year, c.Month+1, 0, 0, 0, 0, 0, time.UTC).Day()
 
 	for days := 1; days <= 31; {
@@ -229,7 +218,7 @@ func days(c date, k keyboard) keyboard {
 }
 
 // returns a complete date inline keyboard that contains year, month and days
-func IKbdate(c date) keyboard {
+func IKbdate(c Date) keyboard {
 	var layout keyboard
 	layout = years(c, layout)
 	layout = months(c, layout)
