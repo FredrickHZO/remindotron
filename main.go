@@ -3,6 +3,7 @@ package main
 import (
 	_ "embed"
 	"strings"
+	"time"
 
 	"github.com/NicoNex/echotron/v3"
 )
@@ -16,7 +17,7 @@ var (
 	//go:embed token
 	token string
 	cal   calendar
-	opts  echotron.APIResponseMessage
+	msg   echotron.APIResponseMessage
 )
 
 // returns a new bot
@@ -34,14 +35,11 @@ func cikm() echotron.InlineKeyboardMarkup {
 	}
 }
 
-// sends a message containing the input string and the calendar
-// inline keyboard markup.
-// if in the bots previous messages there is a calendar, it
-// gets deleted.
+// edits the message with a new calendar inline keyboard
 func (b *bot) editmsg(str string) {
-	b.EditMessageText(
+	msg, _ = b.EditMessageText(
 		str,
-		echotron.NewMessageID(b.chatID, opts.Result.ID),
+		echotron.NewMessageID(b.chatID, msg.Result.ID),
 		&echotron.MessageTextOptions{
 			ParseMode:   echotron.MarkdownV2,
 			ReplyMarkup: cikm(),
@@ -49,23 +47,16 @@ func (b *bot) editmsg(str string) {
 	)
 }
 
-func (b *bot) editmarkup() {
-	b.EditMessageReplyMarkup(
-		echotron.NewMessageID(b.chatID, opts.Result.ID),
-		&echotron.MessageReplyMarkup{
-			ReplyMarkup: cikm(),
-		},
-	)
-}
-
-// handles the creation of a new calendar of the specified type
-func (b *bot) handleCalendar(ctype int) {
-	if opts.Result != nil {
-		b.DeleteMessage(b.chatID, opts.Result.ID)
+// sends a message containing the input string and the calendar
+// inline keyboard markup.
+// if in the bots previous messages there is a calendar, it
+// gets deleted.
+func (b *bot) send(str string) {
+	if msg.Result != nil {
+		b.DeleteMessage(b.chatID, msg.Result.ID)
 	}
-	cal = NewCalendar(ctype)
-	opts, _ = b.SendMessage(
-		introMsg(cal.CalendarType),
+	msg, _ = b.SendMessage(
+		str,
 		b.chatID,
 		&echotron.MessageOptions{
 			ParseMode:   echotron.MarkdownV2,
@@ -74,15 +65,21 @@ func (b *bot) handleCalendar(ctype int) {
 	)
 }
 
+// handles the creation of a new calendar of the specified type
+func (b *bot) handleCalendar(ctype int) {
+	cal = NewCalendar(ctype)
+	b.send(introMsg(ctype))
+}
+
 // sends a new calendar inline keyboard with the next month
 // if it's possible, otherwise with the month that was
 // previously set and shows the correct warning message
 func (b *bot) handleCalendarNextMonth() {
 	if !cal.canGetNextMonth() {
-		b.editmsg(errMsg(cal.CalendarType))
+		b.send(errMsg(cal.CalendarType))
 	} else {
 		cal.nextm()
-		b.editmarkup()
+		b.editmsg(introMsg(cal.CalendarType))
 	}
 }
 
@@ -91,21 +88,42 @@ func (b *bot) handleCalendarNextMonth() {
 // previously set and shows the correct warning message
 func (b *bot) handleCalendarPrevMonth() {
 	if !cal.canGetPreviousMonth() {
-		b.editmsg(errMsg(cal.CalendarType))
+		b.send(errMsg(cal.CalendarType))
 	} else {
 		cal.prevm()
-		b.editmarkup()
+		b.editmsg(introMsg(cal.CalendarType))
 	}
 }
 
 // WIP
 func (b *bot) handleNextYear() {
-	b.editmsg(introMsg(cal.CalendarType))
+	if !cal.canGetNextYear() {
+		b.send(errMsg(cal.CalendarType))
+	} else {
+		if cal.testfunc() {
+			cal.Month = time.Now().Month()
+		}
+		cal.Year++
+		b.editmsg(introMsg(cal.CalendarType))
+	}
+}
+
+func (b *bot) handlePrevYear() {
+	if !cal.canGetPreviousYear() {
+		b.send(errMsg(cal.CalendarType))
+	} else {
+		if cal.testfunc() {
+			cal.Month = time.Now().Month()
+		}
+		cal.Year--
+		b.editmsg(introMsg(cal.CalendarType))
+	}
 }
 
 // handles every interaction with the inline keyboard the bot shows
 func (b *bot) handleInlineQueries(update *echotron.Update) {
 	switch {
+	// no db coded yet, can't generate lists of calendars
 	case update.CallbackQuery.Data == "listappnt":
 		b.SendMessage("Funzione non ancora implementata", b.chatID, nil)
 
@@ -128,10 +146,10 @@ func (b *bot) handleInlineQueries(update *echotron.Update) {
 		b.handleNextYear()
 
 	case update.CallbackQuery.Data == "prevy":
-		b.SendMessage("Funzione non ancora implementata", b.chatID, nil)
+		b.handlePrevYear()
 
 	case isday(update.CallbackQuery.Data):
-		// WIP
+		// WIP, no db to store the chosen date
 	}
 }
 

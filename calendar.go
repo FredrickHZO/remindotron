@@ -48,14 +48,48 @@ func NewCalendar(ctype int) calendar {
 	}
 }
 
-// in appointments you can only start from the current month of the current
-// year onwards, so if the year shown in the calendar is the same as the current year
-// it means the user is trying to set an appointment 'in the past'
-func (c *calendar) prevmAppnt() bool {
-	if c.Year > time.Now().Year() {
+func (c *calendar) canGetPreviousYear() bool {
+	switch c.CalendarType {
+	case APPOINTMENT:
+		if time.Now().Year() == c.Year {
+			return false
+		}
+		return true
+
+	default:
 		return true
 	}
-	return false
+}
+
+func (c *calendar) canGetNextYear() bool {
+	switch c.CalendarType {
+	case BIRTHDAY:
+		if time.Now().Year() == c.Year {
+			return false
+		}
+		return true
+
+	default:
+		return true
+	}
+}
+
+func (c *calendar) testfunc() bool {
+	switch c.CalendarType {
+	case APPOINTMENT:
+		if c.Year == time.Now().Year()+1 &&
+			c.Month < time.Now().Month() {
+			return true
+		}
+		return false
+
+	default:
+		if c.Year == time.Now().Year()-1 &&
+			c.Month > time.Now().Month() {
+			return true
+		}
+		return false
+	}
 }
 
 // returns the correct value {true or false} for every type of calendar
@@ -64,23 +98,14 @@ func (c *calendar) prevmAppnt() bool {
 func (c *calendar) canGetPreviousMonth() bool {
 	switch c.CalendarType {
 	case APPOINTMENT:
-		return c.prevmAppnt()
+		if c.Year > time.Now().Year() {
+			return true
+		}
+		return false
+
 	default:
 		return true
 	}
-}
-
-// in birtdays you can only start from the current month of the current
-// year and go back from there, if the year in the calendar is the same as
-// the current actual year and the month is the same, you cannot choose
-// the following months, it would mean you're trying to set a birthday
-// for someone that was born 'in the future'
-func (c *calendar) nextmBday() bool {
-	if c.Month == time.Now().Month() &&
-		c.Year == time.Now().Year() {
-		return false
-	}
-	return true
 }
 
 // returns the correct value {true or false} for every type of calendar
@@ -89,7 +114,12 @@ func (c *calendar) nextmBday() bool {
 func (c *calendar) canGetNextMonth() bool {
 	switch c.CalendarType {
 	case BIRTHDAY:
-		return c.nextmBday()
+		if c.Month == time.Now().Month() &&
+			c.Year == time.Now().Year() {
+			return false
+		}
+		return true
+
 	default:
 		return true
 	}
