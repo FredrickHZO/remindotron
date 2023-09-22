@@ -48,6 +48,32 @@ func NewCalendar(ctype int) calendar {
 	}
 }
 
+// checks if the month should be reset to the present one
+// if there is a particular (legal) year settting < or > then the
+// current one and an illegal month (for the 'actual real' year) is set, when
+// the year in the calendar is changed back to be the same of the
+// 'actual real' year, the months should be changed aswell
+func (c *calendar) shouldResetMonth() bool {
+	switch c.CalendarType {
+	case APPOINTMENT:
+		if c.Year == time.Now().Year()+1 &&
+			c.Month < time.Now().Month() {
+			return true
+		}
+		return false
+
+	case BIRTHDAY:
+		if c.Year == time.Now().Year()-1 &&
+			c.Month > time.Now().Month() {
+			return true
+		}
+		return false
+
+	default:
+		return false
+	}
+}
+
 func (c *calendar) canGetPreviousYear() bool {
 	switch c.CalendarType {
 	case APPOINTMENT:
@@ -71,24 +97,6 @@ func (c *calendar) canGetNextYear() bool {
 
 	default:
 		return true
-	}
-}
-
-func (c *calendar) testfunc() bool {
-	switch c.CalendarType {
-	case APPOINTMENT:
-		if c.Year == time.Now().Year()+1 &&
-			c.Month < time.Now().Month() {
-			return true
-		}
-		return false
-
-	default:
-		if c.Year == time.Now().Year()-1 &&
-			c.Month > time.Now().Month() {
-			return true
-		}
-		return false
 	}
 }
 

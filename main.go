@@ -100,7 +100,7 @@ func (b *bot) handleNextYear() {
 	if !cal.canGetNextYear() {
 		b.send(errMsg(cal.CalendarType))
 	} else {
-		if cal.testfunc() {
+		if cal.shouldResetMonth() {
 			cal.Month = time.Now().Month()
 		}
 		cal.Year++
@@ -112,7 +112,7 @@ func (b *bot) handlePrevYear() {
 	if !cal.canGetPreviousYear() {
 		b.send(errMsg(cal.CalendarType))
 	} else {
-		if cal.testfunc() {
+		if cal.shouldResetMonth() {
 			cal.Month = time.Now().Month()
 		}
 		cal.Year--
