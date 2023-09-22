@@ -32,8 +32,7 @@ type list struct {
 
 // returns true if the input string is a number
 func isday(s string) bool {
-	_, err := strconv.Atoi(s)
-	if err != nil {
+	if _, err := strconv.Atoi(s); err != nil {
 		return false
 	}
 	return true
@@ -99,8 +98,8 @@ func (c *calendar) canGetNextMonth() bool {
 // safely gets the next month in the calendar, if the month is
 // January when this function is called, the year will change accordingly
 func (c *calendar) prevm() {
-	if int(c.Month) == 1 {
-		c.Month = 12
+	if c.Month == time.January {
+		c.Month = time.December
 		c.Year--
 	} else {
 		c.Month--
@@ -110,8 +109,8 @@ func (c *calendar) prevm() {
 // safely gets the previous month in the calendar, if the month is
 // December when this function is called, the year will change accordingly
 func (c *calendar) nextm() {
-	if int(c.Month) == 12 {
-		c.Month = 1
+	if c.Month == time.December {
+		c.Month = time.January
 		c.Year++
 	} else {
 		c.Month++
