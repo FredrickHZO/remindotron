@@ -1,2 +1,4 @@
 github.com/NicoNex/echotron/v3 v3.26.1 h1:2I+jwvrMsbot+Di39Ro3k3XSiPJTtTh+fFOOiG4RzZI=
 github.com/NicoNex/echotron/v3 v3.26.1/go.mod h1:LpP5IyHw0y+DZUZMBgXEDAF9O8feXrQu7w7nlJzzoZI=
+github.com/akrylysov/pogreb v0.10.1 h1:FqlR8VR7uCbJdfUob916tPM+idpKgeESDXOA1K0DK4w=
+github.com/akrylysov/pogreb v0.10.1/go.mod h1:pNs6QmpQ1UlTJKDezuRWmaqkgUE2TuU0YTWyqJZ7+lI=
