@@ -18,16 +18,25 @@ const (
 	// RECURRENT
 )
 
-type calendar struct {
-	Day          int
-	Month        time.Month
-	Year         int
-	CalendarType int
+var ()
+
+type moment struct {
+	Hours   int `json:"hours,omitempty"`
+	Minutes int `json:"minutes,omitempty"`
 }
 
-type list struct {
-	events   []calendar
-	ListType int
+type date struct {
+	ID       string     `json:"id"`
+	Day      int        `json:"day"`
+	Month    time.Month `json:"month"`
+	Year     int        `json:"years,omitempty"`
+	Hours    moment     `json:"time,omitempty"`
+	dateType int        `json:"datetype"`
+}
+
+type calendar struct {
+	dates    []date `json:"calendar"`
+	ListType int    `json:"calendartype"`
 }
 
 // returns true if the input string is a number
@@ -38,23 +47,23 @@ func isday(s string) bool {
 	return true
 }
 
-// returns a new calendar of the specified type
-func NewCalendar(ctype int) calendar {
-	return calendar{
-		Day:          1,
-		Month:        time.Now().Month(),
-		Year:         time.Now().Year(),
-		CalendarType: ctype,
+// returns a new date of the specified type
+func Newdate(ctype int) date {
+	return date{
+		Day:      1,
+		Month:    time.Now().Month(),
+		Year:     time.Now().Year(),
+		dateType: ctype,
 	}
 }
 
 // checks if the month should be reset to the present one
 // if there is a particular (legal) year settting < or > then the
 // current one and an illegal month (for the 'actual real' year) is set, when
-// the year in the calendar is changed back to be the same of the
+// the year in the date is changed back to be the same of the
 // 'actual real' year, the months should be changed aswell
-func (c *calendar) shouldResetMonth() bool {
-	switch c.CalendarType {
+func (c *date) shouldResetMonth() bool {
+	switch c.dateType {
 	case APPOINTMENT:
 		if c.Year == time.Now().Year()+1 &&
 			c.Month < time.Now().Month() {
@@ -74,8 +83,8 @@ func (c *calendar) shouldResetMonth() bool {
 	}
 }
 
-func (c *calendar) canGetPreviousYear() bool {
-	switch c.CalendarType {
+func (c *date) canGetPreviousYear() bool {
+	switch c.dateType {
 	case APPOINTMENT:
 		if time.Now().Year() == c.Year {
 			return false
@@ -87,8 +96,8 @@ func (c *calendar) canGetPreviousYear() bool {
 	}
 }
 
-func (c *calendar) canGetNextYear() bool {
-	switch c.CalendarType {
+func (c *date) canGetNextYear() bool {
+	switch c.dateType {
 	case BIRTHDAY:
 		if time.Now().Year() == c.Year {
 			return false
@@ -100,11 +109,11 @@ func (c *calendar) canGetNextYear() bool {
 	}
 }
 
-// returns the correct value {true or false} for every type of calendar
+// returns the correct value {true or false} for every type of date
 // when an action to get the previous month of the one shown in
-// the calendar is made
-func (c *calendar) canGetPreviousMonth() bool {
-	switch c.CalendarType {
+// the date is made
+func (c *date) canGetPreviousMonth() bool {
+	switch c.dateType {
 	case APPOINTMENT:
 		if c.Year > time.Now().Year() {
 			return true
@@ -116,11 +125,11 @@ func (c *calendar) canGetPreviousMonth() bool {
 	}
 }
 
-// returns the correct value {true or false} for every type of calendar
+// returns the correct value {true or false} for every type of date
 // when an action to get the next month of the one shown in
-// the calendar is made
-func (c *calendar) canGetNextMonth() bool {
-	switch c.CalendarType {
+// the date is made
+func (c *date) canGetNextMonth() bool {
+	switch c.dateType {
 	case BIRTHDAY:
 		if c.Month == time.Now().Month() &&
 			c.Year == time.Now().Year() {
@@ -133,9 +142,9 @@ func (c *calendar) canGetNextMonth() bool {
 	}
 }
 
-// safely gets the next month in the calendar, if the month is
+// safely gets the next month in the date, if the month is
 // January when this function is called, the year will change accordingly
-func (c *calendar) prevm() {
+func (c *date) prevm() {
 	if c.Month == time.January {
 		c.Month = time.December
 		c.Year--
@@ -144,9 +153,9 @@ func (c *calendar) prevm() {
 	}
 }
 
-// safely gets the previous month in the calendar, if the month is
+// safely gets the previous month in the date, if the month is
 // December when this function is called, the year will change accordingly
-func (c *calendar) nextm() {
+func (c *date) nextm() {
 	if c.Month == time.December {
 		c.Month = time.January
 		c.Year++
@@ -155,8 +164,8 @@ func (c *calendar) nextm() {
 	}
 }
 
-// appends the year buttons to the calendar keyboard
-func years(c calendar, k keyboard) keyboard {
+// appends the year buttons to the date keyboard
+func years(c date, k keyboard) keyboard {
 	yrs := []echotron.InlineKeyboardButton{
 		{Text: "<", CallbackData: "prevy"},
 		{Text: fmt.Sprint(c.Year), CallbackData: "year"},
@@ -166,8 +175,8 @@ func years(c calendar, k keyboard) keyboard {
 	return k
 }
 
-// appends the month buttons to the calendar keaybord
-func months(c calendar, k keyboard) keyboard {
+// appends the month buttons to the date keaybord
+func months(c date, k keyboard) keyboard {
 	mnt := []echotron.InlineKeyboardButton{
 		{Text: "<", CallbackData: "prevm"},
 		{Text: itmonths[c.Month], CallbackData: "month"},
@@ -177,14 +186,14 @@ func months(c calendar, k keyboard) keyboard {
 	return k
 }
 
-// appends a single filler day button for a row of the calendar keyboard
+// appends a single filler day button for a row of the date keyboard
 func emptyday(btn btnrow) btnrow {
 	btn = append(btn,
 		echotron.InlineKeyboardButton{Text: " ", CallbackData: "ignore"})
 	return btn
 }
 
-// appends a single day button for a row of the calendar keyboard
+// appends a single day button for a row of the date keyboard
 func day(btn btnrow, day int) btnrow {
 	btn = append(
 		btn,
@@ -204,8 +213,8 @@ func putday(max, days int, b btnrow) btnrow {
 	return day(b, days)
 }
 
-// fills the calendar inline keyboard with all the days in the month
-func days(c calendar, k keyboard) keyboard {
+// fills the date inline keyboard with all the days in the month
+func days(c date, k keyboard) keyboard {
 	max := time.Date(c.Year, c.Month+1, 0, 0, 0, 0, 0, time.UTC).Day()
 
 	for days := 1; days <= 31; {
@@ -219,8 +228,8 @@ func days(c calendar, k keyboard) keyboard {
 	return k
 }
 
-// returns a complete calendar inline keyboard that contains year, month and days
-func IKbCalendar(c calendar) keyboard {
+// returns a complete date inline keyboard that contains year, month and days
+func IKbdate(c date) keyboard {
 	var layout keyboard
 	layout = years(c, layout)
 	layout = months(c, layout)
