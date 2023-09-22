@@ -16,7 +16,7 @@ type bot struct {
 var (
 	//go:embed token
 	token string
-	cal   calendar
+	dt    date
 	msg   echotron.APIResponseMessage
 )
 
@@ -28,14 +28,14 @@ func newBot(chatID int64) echotron.Bot {
 	}
 }
 
-// returns the calendar inline keayboard markup
+// returns the date inline keayboard markup
 func cikm() echotron.InlineKeyboardMarkup {
 	return echotron.InlineKeyboardMarkup{
-		InlineKeyboard: IKbCalendar(cal),
+		InlineKeyboard: IKbdate(dt),
 	}
 }
 
-// edits the message with a new calendar inline keyboard
+// edits the message with a new date inline keyboard
 func (b *bot) editmsg(str string) {
 	msg, _ = b.EditMessageText(
 		str,
@@ -47,9 +47,9 @@ func (b *bot) editmsg(str string) {
 	)
 }
 
-// sends a message containing the input string and the calendar
+// sends a message containing the input string and the date
 // inline keyboard markup.
-// if in the bots previous messages there is a calendar, it
+// if in the bots previous messages there is a date, it
 // gets deleted.
 func (b *bot) send(str string) {
 	if msg.Result != nil {
@@ -65,65 +65,65 @@ func (b *bot) send(str string) {
 	)
 }
 
-// handles the creation of a new calendar of the specified type
-func (b *bot) handleCalendar(ctype int) {
-	cal = NewCalendar(ctype)
+// handles the creation of a new date of the specified type
+func (b *bot) handledate(ctype int) {
+	dt = Newdate(ctype)
 	b.send(introMsg(ctype))
 }
 
-// sends a new calendar inline keyboard with the next month
+// sends a new date inline keyboard with the next month
 // if it's possible, otherwise with the month that was
 // previously set and shows the correct warning message
-func (b *bot) handleCalendarNextMonth() {
-	if !cal.canGetNextMonth() {
-		b.send(errMsg(cal.CalendarType))
+func (b *bot) handledateNextMonth() {
+	if !dt.canGetNextMonth() {
+		b.send(errMsg(dt.dateType))
 	} else {
-		cal.nextm()
-		b.editmsg(introMsg(cal.CalendarType))
+		dt.nextm()
+		b.editmsg(introMsg(dt.dateType))
 	}
 }
 
-// sends a new calendar inline keyboard with the previous month
+// sends a new date inline keyboard with the previous month
 // if it's possible, otherwise with the month that was
 // previously set and shows the correct warning message
-func (b *bot) handleCalendarPrevMonth() {
-	if !cal.canGetPreviousMonth() {
-		b.send(errMsg(cal.CalendarType))
+func (b *bot) handledatePrevMonth() {
+	if !dt.canGetPreviousMonth() {
+		b.send(errMsg(dt.dateType))
 	} else {
-		cal.prevm()
-		b.editmsg(introMsg(cal.CalendarType))
+		dt.prevm()
+		b.editmsg(introMsg(dt.dateType))
 	}
 }
 
 // WIP
 func (b *bot) handleNextYear() {
-	if !cal.canGetNextYear() {
-		b.send(errMsg(cal.CalendarType))
+	if !dt.canGetNextYear() {
+		b.send(errMsg(dt.dateType))
 	} else {
-		if cal.shouldResetMonth() {
-			cal.Month = time.Now().Month()
+		if dt.shouldResetMonth() {
+			dt.Month = time.Now().Month()
 		}
-		cal.Year++
-		b.editmsg(introMsg(cal.CalendarType))
+		dt.Year++
+		b.editmsg(introMsg(dt.dateType))
 	}
 }
 
 func (b *bot) handlePrevYear() {
-	if !cal.canGetPreviousYear() {
-		b.send(errMsg(cal.CalendarType))
+	if !dt.canGetPreviousYear() {
+		b.send(errMsg(dt.dateType))
 	} else {
-		if cal.shouldResetMonth() {
-			cal.Month = time.Now().Month()
+		if dt.shouldResetMonth() {
+			dt.Month = time.Now().Month()
 		}
-		cal.Year--
-		b.editmsg(introMsg(cal.CalendarType))
+		dt.Year--
+		b.editmsg(introMsg(dt.dateType))
 	}
 }
 
 // handles every interaction with the inline keyboard the bot shows
 func (b *bot) handleInlineQueries(update *echotron.Update) {
 	switch {
-	// no db coded yet, can't generate lists of calendars
+	// no db coded yet, can't generate lists of dates
 	case update.CallbackQuery.Data == "listappnt":
 		b.SendMessage("Funzione non ancora implementata", b.chatID, nil)
 
@@ -131,16 +131,16 @@ func (b *bot) handleInlineQueries(update *echotron.Update) {
 		b.SendMessage("Funzione non ancora implementata", b.chatID, nil)
 
 	case update.CallbackQuery.Data == "appnt":
-		b.handleCalendar(APPOINTMENT)
+		b.handledate(APPOINTMENT)
 
 	case update.CallbackQuery.Data == "bday":
-		b.handleCalendar(BIRTHDAY)
+		b.handledate(BIRTHDAY)
 
 	case update.CallbackQuery.Data == "nextm":
-		b.handleCalendarNextMonth()
+		b.handledateNextMonth()
 
 	case update.CallbackQuery.Data == "prevm":
-		b.handleCalendarPrevMonth()
+		b.handledatePrevMonth()
 
 	case update.CallbackQuery.Data == "nexty":
 		b.handleNextYear()
