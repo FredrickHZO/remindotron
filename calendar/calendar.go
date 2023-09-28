@@ -17,9 +17,9 @@ const (
 	// RECURRENT
 )
 
-type Moment struct {
-	Hours   int `json:"hours,omitempty"`
-	Minutes int `json:"minutes,omitempty"`
+type Time struct {
+	Hours   int `json:"hours"`
+	Minutes int `json:"minutes"`
 }
 
 type Date struct {
@@ -27,13 +27,13 @@ type Date struct {
 	Day      int        `json:"day"`
 	Month    time.Month `json:"month"`
 	Year     int        `json:"years,omitempty"`
-	Hours    Moment     `json:"time,omitempty"`
+	Hours    Time       `json:"time,omitempty"`
 	DateType int        `json:"datetype"`
 }
 
 type Calendar struct {
-	Dates    []Date `json:"calendar"`
-	ListType int    `json:"calendartype"`
+	Dates   []Date `json:"calendar"`
+	CalType int    `json:"calendartype"`
 }
 
 // returns a new date of the specified type
