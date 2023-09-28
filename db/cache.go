@@ -33,3 +33,17 @@ func (c Cache) Get(key []byte) ([]byte, error) {
 	}
 	return val, nil
 }
+
+func (c Cache) Del(key []byte) error {
+	db, err := pogreb.Open(string(c), nil)
+	if err != nil {
+		return err
+	}
+	defer db.Close()
+
+	err = db.Delete(key)
+	if err != nil {
+		return err
+	}
+	return nil
+}
