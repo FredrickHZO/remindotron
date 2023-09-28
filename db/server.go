@@ -17,3 +17,34 @@ func encode(c cl.Calendar) ([]byte, error) {
 	}
 	return buf.Bytes(), nil
 }
+
+func decode(val []byte) (cl.Calendar, error) {
+	var cal cl.Calendar
+
+	dec := gob.NewDecoder(bytes.NewReader(val))
+	if err := dec.Decode(&cal); err != nil {
+		return cl.Calendar{}, err
+	}
+
+	return cal, nil
+}
+
+func PutCalendar(id string, c cl.Calendar) error {
+	b, err := encode(c)
+	if err != nil {
+		return err
+	}
+	return ccCalendar.Put([]byte(id), b)
+}
+
+func GetCalendar(id string) (cl.Calendar, error) {
+	b, err := ccCalendar.Get([]byte(id))
+	if err != nil {
+		return cl.Calendar{}, err
+	}
+	return decode(b)
+}
+
+func DelCalendar(id string) error {
+	return ccCalendar.Del([]byte(id))
+}
